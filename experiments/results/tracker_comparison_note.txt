@@ -1,0 +1,1 @@
+Note: times measure association overhead only (not detection inference). Both trackers run at thousands of FPS for this N=20 scenario; the overhead difference reflects feature vector ops vs pure IoU. The primary LITE advantage over DeepSORT comes from eliminating a ~7-20ms ReID forward pass, not from association cost differences.

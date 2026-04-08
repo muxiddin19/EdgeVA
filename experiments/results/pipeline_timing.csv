@@ -1,0 +1,7 @@
+stage,provider,p50_ms,p95_ms,mean_ms
+preprocess,CUDA,3.787,4.501,3.694
+inference,CUDA,242.846,265.263,241.547
+postprocess,CUDA,0.307,0.442,0.32
+tracking,CUDA,0.016,0.027,0.017
+analytics,CUDA,0.015,0.026,0.016
+total,CUDA,246.786,270.474,245.594

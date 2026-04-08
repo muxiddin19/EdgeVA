@@ -1,0 +1,133 @@
+{
+  "hardware": {
+    "cpu": "AMD Ryzen 5 5600X 6-Core @ 3.7 GHz",
+    "gpu": "NVIDIA GeForce RTX 3060 Ti (8 GB GDDR6)",
+    "ort_version": "1.24.4"
+  },
+  "inference": [
+    {
+      "model": "yolov8n",
+      "provider": "CUDA",
+      "params_M": 3.2,
+      "p50_ms": 32.54,
+      "p95_ms": 35.6,
+      "p99_ms": 37.19,
+      "fps": 30.7,
+      "mean_ms": 32.26,
+      "std_ms": 3.67
+    },
+    {
+      "model": "yolov8s",
+      "provider": "CUDA",
+      "params_M": 11.2,
+      "p50_ms": 98.05,
+      "p95_ms": 126.25,
+      "p99_ms": 151.96,
+      "fps": 10.2,
+      "mean_ms": 101.87,
+      "std_ms": 10.88
+    },
+    {
+      "model": "yolov8m",
+      "provider": "CUDA",
+      "params_M": 25.9,
+      "p50_ms": 250.19,
+      "p95_ms": 276.04,
+      "p99_ms": 316.06,
+      "fps": 4.0,
+      "mean_ms": 254.43,
+      "std_ms": 18.55
+    },
+    {
+      "model": "yolov8n",
+      "provider": "CPU",
+      "params_M": 3.2,
+      "p50_ms": 35.47,
+      "p95_ms": 38.23,
+      "p99_ms": 42.36,
+      "fps": 28.2,
+      "mean_ms": 35.84,
+      "std_ms": 2.62
+    },
+    {
+      "model": "yolov8s",
+      "provider": "CPU",
+      "params_M": 11.2,
+      "p50_ms": 98.06,
+      "p95_ms": 102.42,
+      "p99_ms": 129.06,
+      "fps": 10.2,
+      "mean_ms": 99.5,
+      "std_ms": 9.1
+    },
+    {
+      "model": "yolov8m",
+      "provider": "CPU",
+      "params_M": 25.9,
+      "p50_ms": 251.15,
+      "p95_ms": 272.03,
+      "p99_ms": 303.37,
+      "fps": 4.0,
+      "mean_ms": 249.02,
+      "std_ms": 21.58
+    }
+  ],
+  "pipeline": [
+    {
+      "stage": "preprocess",
+      "provider": "CUDA",
+      "p50_ms": 3.787,
+      "p95_ms": 4.501,
+      "mean_ms": 3.694
+    },
+    {
+      "stage": "inference",
+      "provider": "CUDA",
+      "p50_ms": 242.846,
+      "p95_ms": 265.263,
+      "mean_ms": 241.547
+    },
+    {
+      "stage": "postprocess",
+      "provider": "CUDA",
+      "p50_ms": 0.307,
+      "p95_ms": 0.442,
+      "mean_ms": 0.32
+    },
+    {
+      "stage": "tracking",
+      "provider": "CUDA",
+      "p50_ms": 0.016,
+      "p95_ms": 0.027,
+      "mean_ms": 0.017
+    },
+    {
+      "stage": "analytics",
+      "provider": "CUDA",
+      "p50_ms": 0.015,
+      "p95_ms": 0.026,
+      "mean_ms": 0.016
+    },
+    {
+      "stage": "total",
+      "provider": "CUDA",
+      "p50_ms": 246.786,
+      "p95_ms": 270.474,
+      "mean_ms": 245.594
+    }
+  ],
+  "tracker": [
+    {
+      "tracker": "IoU-only (ByteTrack proxy)",
+      "p50_ms": 0.027,
+      "p95_ms": 0.031,
+      "fps_association": 36900.0
+    },
+    {
+      "tracker": "LITE feature-reuse proxy",
+      "p50_ms": 0.069,
+      "p95_ms": 0.122,
+      "fps_association": 14409.0
+    }
+  ]
+}

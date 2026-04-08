@@ -1,0 +1,3 @@
+tracker,p50_ms,p95_ms,fps_association
+IoU-only (ByteTrack proxy),0.027,0.031,36900.0
+LITE feature-reuse proxy,0.069,0.122,14409.0
