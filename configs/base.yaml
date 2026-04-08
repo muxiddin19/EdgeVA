@@ -1,0 +1,38 @@
+# EdgeVA base configuration
+# Override in vertical-specific configs (retail.yaml, traffic.yaml, etc.)
+
+detection:
+  model_path: "models/yolov8n.onnx"
+  input_size: [640, 640]
+  conf_thresh: 0.25
+  iou_thresh: 0.45
+  device: "cpu"          # cpu | cuda | tensorrt
+  fp16: false
+  is_nms_free: false     # set true for YOLOv10
+  target_classes: null   # null = all classes; [0] = person only
+
+tracking:
+  enabled: true
+  tracker: "feature_reuse"   # feature_reuse | bytetrack | ocsort
+  track_thresh: 0.5
+  match_thresh: 0.8
+  second_thresh: 0.5
+  max_time_lost: 30
+  min_hits: 3
+  fpn_level: "P4"            # P3 | P4 | P5 (LITE paradigm)
+  lambda_iou: 0.5            # 1.0 = pure IoU, 0.0 = pure appearance
+  use_byte: true
+
+hardware:
+  n_warmup: 20
+  n_runs: 200
+  measure_power: true
+  output_dir: "benchmark_results"
+
+privacy:
+  # Edge-only mode: no data leaves the device
+  edge_only: true
+  store_video: false
+  store_thumbnails: false
+  anonymize_output: true       # blur faces in saved outputs
+  data_retention_hours: 24

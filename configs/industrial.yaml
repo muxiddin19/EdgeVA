@@ -1,0 +1,61 @@
+# Industrial safety configuration
+# EU AI Act: HIGH-RISK — human oversight required for enforcement actions
+
+_base_: base.yaml
+
+detection:
+  model_path: "models/ppe_yolov8m.onnx"
+  conf_thresh: 0.40            # higher threshold for safety-critical application
+  target_classes: null         # detect all PPE classes + person
+
+tracking:
+  track_thresh: 0.40
+  max_time_lost: 15            # shorter lost window for safety
+
+analytics:
+  mode: industrial_safety
+
+  ppe_compliance:
+    enabled: true
+    iou_threshold: 0.30
+    alert_threshold: 2         # escalate to ALERT if ≥2 items missing
+
+    zones:
+      construction_floor:
+        vertices: [[0,0],[1920,0],[1920,1080],[0,1080]]
+        required_ppe: [1, 2, 5]   # hard_hat, safety_vest, safety_boots
+        max_occupancy: 20
+        name: "Construction Floor"
+
+      welding_bay:
+        vertices: [[400,200],[900,200],[900,800],[400,800]]
+        required_ppe: [1, 3, 4]   # hard_hat, safety_glasses, gloves
+        max_occupancy: 4
+        name: "Welding Bay"
+
+      chemical_storage:
+        vertices: [[1000,0],[1920,0],[1920,600],[1000,600]]
+        required_ppe: [1, 3, 4, 5, 6]   # hard_hat, glasses, gloves, boots, mask
+        max_occupancy: 2
+        name: "Chemical Storage"
+
+  hazard_zones:
+    enabled: true
+    exclusion_zones:
+      machine_1:
+        vertices: [[300,400],[600,400],[600,700],[300,700]]
+        name: "CNC Machine Exclusion"
+        alert_on_entry: true
+
+  fall_detection:
+    enabled: true
+    response_time_seconds: 10
+
+# IMPORTANT: Automated alerts are advisory only.
+# Human oversight is mandatory before any enforcement action.
+# (EU AI Act Annex III, Article 14 — Human oversight requirement)
+governance:
+  human_oversight_required: true
+  alert_mode: "advisory"       # advisory | enforcement (requires human approval)
+  log_all_violations: true
+  audit_trail: true

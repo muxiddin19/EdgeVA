@@ -1,0 +1,32 @@
+# Core (CPU-only, no hardware-specific deps)
+numpy>=1.24
+scipy>=1.10
+pyyaml>=6.0
+
+# Inference backend (choose one)
+onnxruntime>=1.17          # CPU
+# onnxruntime-gpu>=1.17    # CUDA — uncomment for GPU
+
+# Vision
+opencv-python>=4.8
+
+# Evaluation and analysis
+pandas>=2.0
+matplotlib>=3.7
+tqdm>=4.65
+
+# Gallery search (face recognition)
+# faiss-cpu>=1.7           # CPU FAISS
+# faiss-gpu>=1.7           # GPU FAISS
+
+# Hardware-specific (uncomment as needed)
+# tensorrt                 # NVIDIA TensorRT (Jetson: pre-installed in JetPack)
+# pycuda                   # TensorRT Python bindings
+# hailo-platform           # Hailo-8/10H (requires HailoRT driver)
+# pycoral                  # Google Coral Edge TPU
+# tflite-runtime           # TFLite for Coral
+
+# Development
+pytest>=7.0
+pytest-cov
+ruff

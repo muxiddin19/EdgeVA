@@ -1,0 +1,49 @@
+# Retail analytics configuration
+# Inherits base.yaml defaults; overrides retail-specific settings
+
+_base_: base.yaml
+
+detection:
+  conf_thresh: 0.30
+  target_classes: [0]         # person only
+
+tracking:
+  track_thresh: 0.45
+  max_time_lost: 60           # longer for re-entry scenarios
+
+analytics:
+  mode: retail
+  people_counting:
+    enabled: true
+    lines:
+      - name: "entrance"
+        p1: [640, 0]
+        p2: [640, 1080]
+    zones:
+      entrance_zone:
+        vertices: [[0,0],[640,0],[640,1080],[0,1080]]
+      main_floor:
+        vertices: [[640,0],[1920,0],[1920,1080],[640,1080]]
+
+  dwell_time:
+    enabled: true
+    min_dwell_seconds: 3.0
+    zones:
+      aisle_1:
+        vertices: [[640,200],[900,200],[900,800],[640,800]]
+      aisle_2:
+        vertices: [[900,200],[1200,200],[1200,800],[900,800]]
+      checkout:
+        vertices: [[1200,400],[1920,400],[1920,1080],[1200,1080]]
+
+  queue:
+    enabled: true
+    zone:
+      vertices: [[1500,400],[1920,400],[1920,1080],[1500,1080]]
+    alert_length: 5             # alert when queue > 5 persons
+    alert_wait_seconds: 120     # alert when estimated wait > 2 min
+
+privacy:
+  edge_only: true
+  anonymize_output: true
+  data_retention_hours: 72
