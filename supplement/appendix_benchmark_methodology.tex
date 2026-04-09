@@ -1,0 +1,209 @@
+%%
+%% appendix_benchmark_methodology.tex
+%% Online Supplementary Material for:
+%%   "Edge-Intelligent Video Analytics: A Systematic Survey of
+%%    Architectures, Applications, and Deployment Strategies
+%%    Across Smart City Verticals"
+%% ACM Computing Surveys — Supplementary Appendix
+%%
+%% This document is published as online-only supplementary material
+%% in the ACM Digital Library alongside the main article.
+%% Compile standalone: pdflatex appendix_benchmark_methodology.tex
+%%
+
+\documentclass[manuscript]{acmart}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\setcopyright{none}
+
+\title{Supplementary Material: EdgeVA Benchmarking Methodology}
+\subtitle{Online Appendix for the ACM Computing Surveys Submission}
+
+\author{Mukhiddin Toshpulatov}
+\orcid{0000-0002-8819-852X}
+\affiliation{%
+  \institution{Computer Engineering, College of Information Technology
+               Convergence, Gachon University}
+  \city{Seongnam}
+  \country{South Korea}}
+\email{mukhiddin@gachon.ac.kr}
+
+\author{Wookey Lee}
+\orcid{0000-0001-8586-4577}
+\authornote{Corresponding authors.}
+\affiliation{%
+  \institution{Departments of Industrial and Biomedical Science Engineering,
+               Inha University}
+  \city{Incheon}
+  \country{South Korea}}
+\email{trinity@inha.ac.kr}
+
+\author{Jinsoo Cho}
+\orcid{0000-0002-8119-8068}
+\authornotemark[1]
+\affiliation{%
+  \institution{Computer Engineering, College of Information Technology
+               Convergence, Gachon University}
+  \city{Seongnam}
+  \country{South Korea}}
+\email{jscho@gachon.ac.kr}
+
+\renewcommand{\shortauthors}{Toshpulatov, Lee, and Cho}
+
+\begin{abstract}
+This supplementary appendix provides the complete EdgeVA benchmarking
+methodology supporting the hardware performance results in the main
+article. It documents hardware configurations, software versions, model
+export procedures, measurement protocols, pipeline-timing breakdowns,
+and confidence-interval calculations. All scripts and raw results are
+publicly available at \url{https://github.com/muxiddin19/EdgeVA}.
+\end{abstract}
+
+\begin{document}
+\maketitle
+
+\section{Hardware Configuration}
+
+\subsection*{Server Platform (CPU and GPU Runs)}
+
+\begin{itemize}[leftmargin=*, noitemsep]
+  \item \textbf{CPU}: Intel Core i9-14900K (24-core/32-thread,
+    3.2\,GHz base / 6.0\,GHz boost)
+  \item \textbf{GPU}: Dual NVIDIA GeForce RTX~4090 (24\,GB GDDR6X each);
+    benchmarks pinned to GPU~0 (\texttt{device\_id=0})
+  \item \textbf{RAM}: 125\,GB DDR5
+  \item \textbf{OS}: Ubuntu~22.04.4 LTS (kernel 6.8.0)
+  \item \textbf{Driver / CUDA}: NVIDIA driver 535.288.01; CUDA~12.2
+  \item \textbf{Environment}: dedicated \texttt{edgeva} conda environment
+    (Python~3.10.20), isolated from other projects to avoid library conflicts
+  \item \textbf{Key packages}: \texttt{onnxruntime-gpu}~1.24.4 (PyPI),
+    \texttt{ultralytics}~8.4.36, \texttt{onnxslim}~0.1.90,
+    \texttt{onnx}~1.16.0, \texttt{scipy}~1.13.0, \texttt{numpy}~1.26.4
+\end{itemize}
+
+\subsection*{Jetson Orin NX Figures (from Literature)}
+
+Jetson Orin NX 16\,GB results cited from~\cite{alqahtani2024edgebench}:
+JetPack~5.1.2, TensorRT~8.6.2, ONNX~1.14, INT8 calibration on
+COCO 2017 val (500 representative images selected by entropy).
+
+\section{Model Export Procedure}
+
+ONNX models exported using the \texttt{ultralytics} Python API:
+
+\begin{verbatim}
+from ultralytics import YOLO
+model = YOLO("yolov8n.pt")
+model.export(format="onnx", opset=20,
+             simplify=True, dynamic=False,
+             imgsz=640)
+\end{verbatim}
+
+Post-processed with \texttt{onnxslim} for graph simplification.
+No TensorRT engine conversion was performed for server-side runs;
+the ONNX Runtime \texttt{CUDAExecutionProvider} with
+\texttt{ORT\_ENABLE\_ALL} graph optimization was used exclusively.
+
+\subsection*{Model Checksums (SHA-256, truncated)}
+
+\begin{tabular}{lll}
+\toprule
+\textbf{Model} & \textbf{SHA-256 (first 8 chars)} & \textbf{Size} \\
+\midrule
+\texttt{yolov8n.onnx} & \texttt{b3a1f2e4} & 12.3\,MB \\
+\texttt{yolov8s.onnx} & \texttt{d7f2c8a1} & 42.8\,MB \\
+\texttt{yolov8m.onnx} & \texttt{e9c4b3f7} & 99.0\,MB \\
+\bottomrule
+\end{tabular}
+
+Full SHA-256 hashes and download links are in
+\texttt{experiments/results/gpu\_summary.json} in the repository.
+
+\section{Measurement Protocol}
+
+\begin{itemize}[leftmargin=*, noitemsep]
+  \item \textbf{Input}: random FP32 tensor $1{\times}3{\times}640{\times}640$,
+    values $\sim\mathcal{U}(0,1)$; batch size~=~1.
+  \item \textbf{Warmup}: 100 inference calls discarded before timing begins.
+  \item \textbf{Timed runs}: 500 calls; wall-clock time measured with
+    \texttt{time.perf\_counter()} bracketing each \texttt{session.run()} call.
+  \item \textbf{Reported statistics}: p50 (median), p95, p99 latency (ms);
+    FPS $= 1000 / \mathrm{p50}$; mean and std also recorded.
+  \item \textbf{Threading}: \texttt{intra\_op\_num\_threads=8} for CPU
+    provider; GPU provider uses the CUDA default stream.
+  \item \textbf{Thermal steady-state}: server fan control set to automatic;
+    10-minute system idle before each benchmark run.
+    GPU junction temperature remained below 83°C throughout.
+  \item \textbf{Power measurement}: GPU power sampled via
+    \texttt{nvidia-smi --query-gpu=power.draw --format=csv}
+    at 1\,s intervals during the 500-run window; mean reported.
+    GPU~0 drew $\approx$68\,W (YOLOv8n CUDA) to
+    $\approx$112\,W (YOLOv8m CUDA) during inference.
+  \item \textbf{CPU provider isolation}: CPU runs used
+    \texttt{CPUExecutionProvider} only; GPU was idle.
+\end{itemize}
+
+\section{Pipeline-Timing Breakdown}
+
+Full-pipeline timing (reported in the main article, Table~2 and
+Section~6.4) applies the same 500-run / 100-warmup protocol to a
+sequential five-stage pipeline:
+
+\begin{enumerate}[leftmargin=*, noitemsep]
+  \item \textbf{Preprocess}: BGR$\rightarrow$RGB, HWC$\rightarrow$BCHW,
+    divide by 255, cast to FP32 (\texttt{numpy}).
+  \item \textbf{Inference}: ONNX Runtime \texttt{session.run()}.
+  \item \textbf{Postprocess}: confidence threshold filter ($>0.25$),
+    box decoding.
+  \item \textbf{Tracking}: LITE-proxy association (Hungarian algorithm,
+    IoU cost matrix, $\tau_\mathrm{IoU}=0.45$).
+  \item \textbf{Analytics}: zone occupancy count (point-in-polygon test).
+\end{enumerate}
+
+Each stage is timed separately with \texttt{time.perf\_counter()};
+total pipeline latency = sum of all five stages.
+
+\section{Confidence Intervals}
+
+With 500 runs and empirical latency standard deviations of
+2--5\,ms (CUDA) and 3--12\,ms (CPU), the 95\% bootstrap confidence
+interval on the p50 estimate is $\pm0.3$--$0.7$\,ms
+($B=10{,}000$ bootstrap replicates). Full bootstrap distributions
+are provided in \texttt{experiments/results/gpu\_summary.json}.
+
+The CI formula used:
+
+\begin{equation}
+\mathrm{CI}_{95} = \left[
+  \hat{\theta}^*_{0.025},\;\hat{\theta}^*_{0.975}
+\right],
+\end{equation}
+
+where $\hat{\theta}^*_\alpha$ is the $\alpha$-quantile of the
+bootstrap distribution of the median estimator over $B$ resamples.
+
+\section{Reproducibility Checklist}
+
+\begin{tabular}{lc}
+\toprule
+\textbf{Item} & \textbf{Available} \\
+\midrule
+Benchmark scripts (\texttt{run\_benchmarks\_gpu.py}) & \checkmark \\
+Model export script (\texttt{export\_models.py}) & \checkmark \\
+Environment spec (\texttt{setup\_env.sh}, \texttt{requirements.txt}) & \checkmark \\
+Raw CSV results (\texttt{experiments/results/}) & \checkmark \\
+Bootstrap summary JSON (\texttt{gpu\_summary.json}) & \checkmark \\
+Model ONNX files (via HuggingFace or direct download) & \checkmark \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\noindent
+All artefacts are at:
+\url{https://github.com/muxiddin19/EdgeVA}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{../../AntVision/csur_submission/AntVision_refs,
+              ../../AntVision/csur_submission/csur_extra}
+
+\end{document}
