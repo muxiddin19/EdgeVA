@@ -116,7 +116,7 @@
 	
 	%% ---------------------------------------------------------------
 	\section{Measurement Protocol}
-	
+	\label{sec:measurement}
 	\begin{itemize}[leftmargin=*, noitemsep]
 		\item \textbf{Input:} random FP32 tensor $1\times3\times640\times640$,
 		values $\sim\mathcal{U}(0,1)$; batch size = 1.
@@ -306,7 +306,7 @@ frontier matters more than statistical certainty.
 \medskip
 \noindent\textbf{Tier~3 --- Author-measured.}
 Produced directly by our EdgeVA benchmarking harness (described in
-Sections~\ref{sec:hw_config}--\ref{sec:reproducibility} of this
+Subsections~\ref{subsec:hw_config}--\ref{subsec:reproducibility} of this
 document). Tier-3 results are distinguished from literature-reported
 values in Table~2 and Figure~5 of the main article via the dagger
 marker ($\ddagger$). Specifically:
@@ -588,7 +588,7 @@ recommendation in Section~6.3 of the main article.
 %% ---------------------------------------------------------------
 \section{Extended Pipeline-Timing Analysis: Per-Stage Breakdown
          Across Platforms}
-\label{sec:pipeline_timing_extended}
+\label{sec:pipeline_timing_extended} 
 
 \noindent The main article (Section~6.4, Figure~7) reports total
 pipeline latency figures. This section provides the complete per-stage
@@ -597,6 +597,7 @@ to identify the dominant latency stage for their target hardware
 and model selection.
 
 \subsection{Measurement Setup}
+\label{subsec:hw_config}
 
 All Tier-3 (author-measured) results in this section use the EdgeVA
 harness on the Intel i9-14900K + NVIDIA RTX~4090 server
@@ -654,7 +655,7 @@ Section~\ref{sec:measurement}.
 \end{itemize}
 
 \subsection{Multi-Stream Scaling and DRAM Saturation}
-
+\label{subsec:reproducibility}
 Multi-stream deployments introduce contention on shared resources:
 NVDEC decode engines, PCIe bandwidth (discrete GPU setups), and
 unified LPDDR5 DRAM on Jetson platforms. Empirically, a
